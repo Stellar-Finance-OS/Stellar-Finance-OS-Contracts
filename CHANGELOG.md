@@ -20,6 +20,16 @@ event shape or error code is a **major** bump.
   - Error 9 `NotBusiness` is reserved and no longer returned.
   - The indexer must key invoices on `(business, id)`. Generated bindings
     need regenerating (`./scripts/bindings.sh`).
+- Events are now self-sufficient for the backend indexer (#6): the indexer
+  can update its mirror from each event alone, with no follow-up `get_*` read.
+  See the migration note in `docs/events.md`.
+  - `approval-vault`: new `deposited { #[topic] token, from, amount }` event,
+    emitted once by `deposit`.
+  - `approval-vault`: `proposed` gains `memo_ref`, `expires_at`.
+  - `approval-vault`: `executed` gains `token`, `to`, `amount`.
+  - `approval-vault`: `policy_proposed` gains `expires_at`.
+  - `invoice-registry`: `registered` gains `content_hash`.
+  - Workspace version bumped to 1.0.0.
 
 - `invoice-registry`: invoices have a `payee` (issue #4), so revenue can be
   paid straight into an `approval-vault`.

@@ -18,6 +18,7 @@ pub struct Registered {
     pub business: Address,
     pub token: Address,
     pub amount: i128,
+    pub content_hash: BytesN<32>,
     pub payee: Address,
 }
 

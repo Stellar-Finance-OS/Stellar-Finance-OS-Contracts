@@ -41,6 +41,7 @@ Status: **pre-audit, testnet only.** Not upgradeable (no `update_current_contrac
 | V12 | Id overflow | `checked_add` on `NextProposalId` | Code review |
 | V13 | Two approved proposals together overspend the vault | Each `execute` re-checks the live balance; the second one fails and stays Pending | `two_proposals_cannot_overspend_vault`, `insufficient_balance_proposal_executes_after_top_up` |
 | V14 | Hidden extra or missing `require_auth` | The recorded auth trees are asserted exactly | `propose_requires_exactly_the_proposers_auth`, `deposit_requires_depositor_auth_for_vault_and_token_transfer`, `execute_requires_no_auth` |
+| V15 | Fake token emits a `deposited` event that looks like a treasury inflow | `deposit` accepts any token address, so `deposited` is only emitted after that token's `transfer` succeeds. **The indexer must only trust `deposited` for allow-listed token addresses** (same rule as R8) | `deposit_emits_one_deposited_event`, `deposit_rejects_unknown_token` |
 
 ### invoice-registry
 

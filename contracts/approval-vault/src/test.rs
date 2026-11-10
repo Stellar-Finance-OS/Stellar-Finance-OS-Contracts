@@ -433,6 +433,36 @@ fn deposit_moves_tokens_into_vault() {
 }
 
 #[test]
+fn deposit_emits_one_deposited_event() {
+    let s = Setup::new();
+    let from = Address::generate(&s.env);
+    s.mint(&from, 300);
+    let args = (from.clone(), s.token.address.clone(), 300i128).into_val(&s.env);
+    let sub = [token_transfer_auth(
+        &s.env,
+        &s.token.address,
+        &from,
+        &s.vault_id,
+        300,
+    )];
+    auth(&s.env, &from, &s.vault_id, "deposit", args, &sub);
+    s.vault.deposit(&from, &s.token.address, &300);
+    let expected = events::Deposited {
+        token: s.token.address.clone(),
+        from,
+        amount: 300,
+    };
+    assert_eq!(
+        s.env
+            .events()
+            .all()
+            .filter_by_contract(&s.vault_id)
+            .events(),
+        [expected.to_xdr(&s.env, &s.vault_id)]
+    );
+}
+
+#[test]
 fn deposit_rejects_zero_amount() {
     let s = Setup::new();
     let from = Address::generate(&s.env);
@@ -535,6 +565,8 @@ fn propose_emits_proposed_event() {
         token: s.token.address.clone(),
         to,
         amount: 400,
+        memo_ref: s.memo(1),
+        expires_at: NOW + TTL,
     };
     assert_eq!(
         s.env
@@ -774,7 +806,12 @@ fn execute_emits_executed_event() {
     let id = s.propose(&s.approvers[0], &to, 400);
     s.approve(&s.approvers[1], id);
     s.try_execute(id).unwrap();
-    let expected = events::Executed { proposal_id: id };
+    let expected = events::Executed {
+        proposal_id: id,
+        token: s.token.address.clone(),
+        to,
+        amount: 400,
+    };
     assert_eq!(
         s.env
             .events()
@@ -981,6 +1018,7 @@ fn propose_policy_update_emits_policy_proposed_event() {
         proposer: s.approvers[1].clone(),
         approvers: new,
         threshold: 1,
+        expires_at: NOW + TTL,
     };
     assert_eq!(
         s.env
@@ -1761,17 +1799,29 @@ fn event_topic_xdr_matches_docs() {
                 proposer: a.clone(),
                 token: a.clone(),
                 to: a.clone(),
-                amount: 1
+                amount: 1,
+                memo_ref: BytesN::from_array(&env, &[0; 32]),
+                expires_at: 1
             }
             .to_xdr(&env, &id),
             "AAAADwAAAAhwcm9wb3NlZA==",
+        ),
+        (
+            events::Deposited {
+                token: a.clone(),
+                from: a.clone(),
+                amount: 1
+            }
+            .to_xdr(&env, &id),
+            "AAAADwAAAAlkZXBvc2l0ZWQAAAA=",
         ),
         (
             events::PolicyProposed {
                 proposal_id: 0,
                 proposer: a.clone(),
                 approvers: vec![&env],
-                threshold: 1
+                threshold: 1,
+                expires_at: 1
             }
             .to_xdr(&env, &id),
             "AAAADwAAAA9wb2xpY3lfcHJvcG9zZWQA",
@@ -1786,7 +1836,13 @@ fn event_topic_xdr_matches_docs() {
             "AAAADwAAAAhhcHByb3ZlZA==",
         ),
         (
-            events::Executed { proposal_id: 0 }.to_xdr(&env, &id),
+            events::Executed {
+                proposal_id: 0,
+                token: a.clone(),
+                to: a.clone(),
+                amount: 1
+            }
+            .to_xdr(&env, &id),
             "AAAADwAAAAhleGVjdXRlZA=="
         ),
         (

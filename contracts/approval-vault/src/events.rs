@@ -5,8 +5,12 @@
 //!
 //! Topic layout: `[<event_name>, proposal_id]`. The event name is the struct
 //! name in snake_case. `proposal_id` is a topic so the indexer can filter on it.
+//! Exception: `deposited` has no proposal, so its second topic is the token.
+//!
+//! Every event carries enough data for the indexer to update its mirror
+//! without a follow-up `get_*` read.
 
-use soroban_sdk::{contractevent, Address, Vec};
+use soroban_sdk::{contractevent, Address, BytesN, Vec};
 
 #[contractevent]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -16,6 +20,18 @@ pub struct Proposed {
     pub proposer: Address,
     pub token: Address,
     pub to: Address,
+    pub amount: i128,
+    pub memo_ref: BytesN<32>,
+    pub expires_at: u64,
+}
+
+/// `amount` of `token` was deposited into the vault by `from`.
+#[contractevent]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Deposited {
+    #[topic]
+    pub token: Address,
+    pub from: Address,
     pub amount: i128,
 }
 
@@ -29,6 +45,7 @@ pub struct PolicyProposed {
     pub proposer: Address,
     pub approvers: Vec<Address>,
     pub threshold: u32,
+    pub expires_at: u64,
 }
 
 #[contractevent]
@@ -45,6 +62,9 @@ pub struct Approved {
 pub struct Executed {
     #[topic]
     pub proposal_id: u64,
+    pub token: Address,
+    pub to: Address,
+    pub amount: i128,
 }
 
 #[contractevent]

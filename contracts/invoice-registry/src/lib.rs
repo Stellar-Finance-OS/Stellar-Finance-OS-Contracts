@@ -63,6 +63,7 @@ impl InvoiceRegistry {
                 amount,
                 paid: 0,
                 status: InvoiceStatus::Open,
+                content_hash: content_hash.clone(),
                 content_hash,
                 payee: payee.clone(),
             },
@@ -72,6 +73,7 @@ impl InvoiceRegistry {
             business,
             token,
             amount,
+            content_hash,
             payee,
         }
         .publish(&env);

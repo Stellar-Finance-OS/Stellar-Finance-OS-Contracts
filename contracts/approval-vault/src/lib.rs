@@ -15,7 +15,9 @@ mod test;
 use finance_os_common::amount;
 use soroban_sdk::{contract, contractimpl, token, vec, Address, BytesN, Env, Vec};
 
-use crate::events::{Approved, Cancelled, Executed, PolicyProposed, PolicyUpdated, Proposed};
+use crate::events::{
+    Approved, Cancelled, Deposited, Executed, PolicyProposed, PolicyUpdated, Proposed,
+};
 use crate::types::{Error, Policy, PolicyProposal, Proposal, ProposalStatus, MAX_APPROVERS};
 
 #[contract]
@@ -48,6 +50,12 @@ impl ApprovalVault {
             env.current_contract_address(),
             &amount,
         );
+        Deposited {
+            token,
+            from,
+            amount,
+        }
+        .publish(&env);
         Ok(())
     }
 
@@ -84,7 +92,7 @@ impl ApprovalVault {
                 token: token.clone(),
                 to: to.clone(),
                 amount,
-                memo_ref,
+                memo_ref: memo_ref.clone(),
                 created_by: proposer.clone(),
                 approvals: vec![&env, proposer.clone()],
                 status: ProposalStatus::Pending,
@@ -97,6 +105,8 @@ impl ApprovalVault {
             token,
             to,
             amount,
+            memo_ref,
+            expires_at,
         }
         .publish(&env);
         Ok(id)
@@ -151,7 +161,13 @@ impl ApprovalVault {
         storage::set_proposal(&env, &proposal);
         token.transfer(&vault, &proposal.to, &proposal.amount);
 
-        Executed { proposal_id: id }.publish(&env);
+        Executed {
+            proposal_id: id,
+            token: proposal.token,
+            to: proposal.to,
+            amount: proposal.amount,
+        }
+        .publish(&env);
         Ok(())
     }
 
@@ -210,6 +226,7 @@ impl ApprovalVault {
             proposer,
             approvers: new_policy.approvers,
             threshold: new_policy.threshold,
+            expires_at,
         }
         .publish(&env);
         Ok(id)

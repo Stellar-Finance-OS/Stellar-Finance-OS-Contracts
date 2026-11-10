@@ -248,6 +248,7 @@ fn register_emits_registered_event() {
         business: s.business.clone(),
         token: s.token.address.clone(),
         amount: 500,
+        content_hash: s.hash(0xC0),
         payee: s.business.clone(),
     };
     assert_eq!(
@@ -1267,6 +1268,7 @@ fn event_topic_xdr_matches_docs() {
                 business: a.clone(),
                 token: a.clone(),
                 amount: 1,
+                content_hash: id.clone()
                 payee: a.clone()
             }
             .to_xdr(&env, &contract),
