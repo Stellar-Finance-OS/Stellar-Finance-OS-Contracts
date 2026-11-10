@@ -36,7 +36,7 @@ jobs:
         with:
           targets: wasm32v1-none
       - uses: Swatinem/rust-cache@v2
-      - uses: stellar/stellar-cli@v28.1.0
+      - uses: stellar/stellar-cli@v30.0.1
       - name: stellar contract build
         run: ./scripts/build.sh
       - name: Wasm size limit (64 KiB network max)
