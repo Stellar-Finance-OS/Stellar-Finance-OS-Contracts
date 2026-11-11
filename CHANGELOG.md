@@ -30,7 +30,6 @@ event shape or error code is a **major** bump.
   - `approval-vault`: `policy_proposed` gains `expires_at`.
   - `invoice-registry`: `registered` gains `content_hash`.
   - Workspace version bumped to 1.0.0.
-
 - `invoice-registry`: invoices have a `payee` (issue #4), so revenue can be
   paid straight into an `approval-vault`.
   - `register(business, id, token, amount, content_hash)` →
@@ -43,9 +42,6 @@ event shape or error code is a **major** bump.
 
 ### Added
 - `invoice-registry`: `close(business, id)`, `InvoiceStatus::Closed`, event `closed { business, paid, outstanding }`, error 10 `NothingPaid`. Lets a business finalise a partially paid invoice. Like `void`, `close` looks the invoice up by `(business, id)`, so another business gets `InvoiceNotFound`.
-- `invoice-registry`: `close` entrypoint, `InvoiceStatus::Closed`, `closed`
-  event and error 10 `NothingPaid`, so a partially paid invoice can reach a
-  terminal state.
 - `approval-vault` error 14 `InvalidToken`: `propose` now rejects a `token`
   that does not implement the token interface, instead of letting the
   proposal collect approvals and fail in `execute` with a host error.

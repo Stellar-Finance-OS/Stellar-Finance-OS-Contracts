@@ -81,9 +81,7 @@ contract), so this table can't silently drift from the code.
 
 | Event | Fields (ScVal type) |
 |---|---|
-| `registered` | `amount` (I128), `business` (Address), `content_hash` (Bytes(32)), `token` (Address) |
-| `registered` | `amount` (I128), `business` (Address), `token` (Address) |
-| `registered` | `amount` (I128), `business` (Address), `payee` (Address), `token` (Address) |
+| `registered` | `amount` (I128), `business` (Address), `content_hash` (Bytes(32)), `payee` (Address), `token` (Address) |
 | `paid` | `amount` (I128), `business` (Address), `payer` (Address), `total_paid` (I128) |
 | `voided` | `business` (Address) |
 | `closed` | `business` (Address), `outstanding` (I128), `paid` (I128) |
@@ -109,10 +107,9 @@ contract), so this table can't silently drift from the code.
 
 - An invoice is identified by `(business, id)`; the same `id` can exist under several businesses. Key your records on both.
 - `registered`: create the record (Open, `paid = 0`) with `business`, `token`,
-  `amount` and `content_hash`. Compare `content_hash` with the backend
-  document to verify the on-chain invoice.
-- `paid`: look up `(business, id)` and set `paid = total_paid`. Mark Paid when `total_paid` equals the registered `amount`.
-- `registered`: create the record (Open) and store its `payee`: every payment for this invoice lands there (may differ from `business`, e.g. an approval vault).
+  `amount`, `content_hash` and `payee`. Compare `content_hash` with the backend
+  document to verify the on-chain invoice. Every payment for this invoice lands
+  at `payee` (may differ from `business`, e.g. an approval vault).
 - `paid`: look up `(business, id)` and set `paid = total_paid`. Mark Paid when `total_paid` equals the registered `amount`. The funds went to the stored `payee`.
 - `voided`: look up `(business, id)` and mark Void.
 - `closed`: look up `(business, id)` and mark Closed (terminal). `paid` is final and `outstanding == amount - paid`; no further `paid` events will occur.
@@ -140,7 +137,7 @@ that reject unknown map keys must be updated.
 | approval-vault | `proposed` | `amount`, `proposer`, `to`, `token` | + `expires_at`, `memo_ref` |
 | approval-vault | `executed` | (none) | `amount`, `to`, `token` |
 | approval-vault | `policy_proposed` | `approvers`, `proposer`, `threshold` | + `expires_at` |
-| invoice-registry | `registered` | `amount`, `business`, `token` | + `content_hash` |
+| invoice-registry | `registered` | `amount`, `business`, `token` | + `content_hash`, `payee` |
 | invoice-registry | `paid` | `amount`, `payer`, `total_paid` | + `business` (invoices are keyed by `(business, id)`) |
 | invoice-registry | `voided` | (none) | `business` |
 | invoice-registry | `closed` | (event did not exist) | `business`, `outstanding`, `paid` |

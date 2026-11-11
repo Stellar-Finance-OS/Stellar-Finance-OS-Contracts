@@ -58,8 +58,8 @@ Status: **pre-audit, testnet only.** Not upgradeable (no `update_current_contrac
 | R9 | i128 overflow on `paid` | `checked_add` → `ArithmeticOverflow` | `pay_rejects_overflowing_total` |
 | R10 | PII on-chain | Only hashes and amounts are stored (`id`, `content_hash`) | Design / backend responsibility |
 | R12 | Partially paid invoice stays payable forever | `close` makes it terminal; `pay` then fails `NotOpen` | `close_blocks_payment`, `no_payment_accepted_after_close` |
-| R12 | Payee (e.g. a vault) controls or redirects an invoice it is paid into | Only `business` can `void`/`close`; lookups are keyed by `(business, id)` so the payee reaches nothing. `payee` is fixed at `register` | `payee_cannot_void_or_close`, `pay_routes_funds_to_payee_not_business` |
-| R13 | Registry accumulates funds (`payee` = registry) | `register` rejects `payee == current_contract_address()` with `InvalidPayee`; `pay` always transfers payer → payee | `register_rejects_registry_as_payee`, property test `paid_never_exceeds_amount_and_registry_holds_nothing` |
+| R13 | Payee (e.g. a vault) controls or redirects an invoice it is paid into | Only `business` can `void`/`close`; lookups are keyed by `(business, id)` so the payee reaches nothing. `payee` is fixed at `register` | `payee_cannot_void_or_close`, `pay_routes_funds_to_payee_not_business` |
+| R14 | Registry accumulates funds (`payee` = registry) | `register` rejects `payee == current_contract_address()` with `InvalidPayee`; `pay` always transfers payer → payee | `register_rejects_registry_as_payee`, property test `paid_never_exceeds_amount_and_registry_holds_nothing` |
 | R11 | Reusing a voided id makes events ambiguous | Ids are never freed per business; `InvoiceExists` even after `void` | `void_does_not_free_the_id_for_reuse` |
 
 ## Residual risks and open items

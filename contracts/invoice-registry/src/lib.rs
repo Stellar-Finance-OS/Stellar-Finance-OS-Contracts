@@ -64,7 +64,6 @@ impl InvoiceRegistry {
                 paid: 0,
                 status: InvoiceStatus::Open,
                 content_hash: content_hash.clone(),
-                content_hash,
                 payee: payee.clone(),
             },
         );
@@ -157,9 +156,6 @@ impl InvoiceRegistry {
     /// Close a partially paid Open invoice (discount, write-off, or remainder
     /// settled off-chain). `business` can only reach its own invoices: the
     /// lookup is by `(business, id)`. Zero-paid invoices must use `void`.
-    /// Close a partially paid Open invoice (discount, dispute, write-off or
-    /// remainder settled off-chain). Only the invoice's business may close it.
-    /// Invoices with nothing paid must use `void` instead.
     pub fn close(env: Env, business: Address, id: BytesN<32>) -> Result<(), Error> {
         business.require_auth();
         storage::bump_instance(&env);

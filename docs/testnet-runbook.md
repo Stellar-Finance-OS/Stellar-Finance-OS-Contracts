@@ -94,7 +94,7 @@ REG=invoice-registry
 ID=$(printf 'invoice-0001:%s' "$INVOICE_ID_SALT" | sha256sum | cut -d' ' -f1)
 DOC=$(printf 'invoice-0001-pdf-bytes' | sha256sum | cut -d' ' -f1)
 
-INV $REG acme register --business acme --id $ID --token $TOKEN --amount 50000000 --content_hash $DOC
+INV $REG acme register --business acme --id $ID --token $TOKEN --amount 50000000 --content_hash $DOC --payee acme
 INV $REG client pay --payer client --business acme --id $ID --amount 20000000
 INV $REG client get --business acme --id $ID         # paid 20000000, status Open
 INV $REG client pay --payer client --business acme --id $ID --amount 40000000   # #5 Overpayment

@@ -1078,6 +1078,7 @@ fn register_with_payee_emits_payee_in_event() {
         business: s.business.clone(),
         token: s.token.address.clone(),
         amount: 500,
+        content_hash: s.hash(0xC0),
         payee,
     };
     assert_eq!(
@@ -1268,7 +1269,7 @@ fn event_topic_xdr_matches_docs() {
                 business: a.clone(),
                 token: a.clone(),
                 amount: 1,
-                content_hash: id.clone()
+                content_hash: id.clone(),
                 payee: a.clone()
             }
             .to_xdr(&env, &contract),
@@ -1299,7 +1300,6 @@ fn event_topic_xdr_matches_docs() {
                 business: a.clone(),
                 paid: 1,
                 outstanding: 0
-                outstanding: 1
             }
             .to_xdr(&env, &contract),
             "AAAADwAAAAZjbG9zZWQAAA=="
